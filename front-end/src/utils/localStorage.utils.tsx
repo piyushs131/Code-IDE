@@ -24,8 +24,7 @@ export const removeFromLocalStorage = (key: string) => {
 
 export const getPrevThemes = (): TTheme => {
   let prevTheme = getFromLocalStorage("codeverse-color-theme");
-  if (!themesNameArray.find((theme) => theme === prevTheme))
-    prevTheme = "vs-dark";
+  if (!themesNameArray.includes(prevTheme)) prevTheme = "vs-dark";
   return prevTheme;
 };
 
@@ -47,12 +46,7 @@ export const getPrevTabSize = () => {
 
 export const getPrevWordWrap = () => {
   let prevWordWrap = getFromLocalStorage("codeverse-word-wrap");
-  if (
-    prevWordWrap !== "on" &&
-    prevWordWrap !== "off" &&
-    prevWordWrap !== "wordWrapColumn" &&
-    prevWordWrap !== "bounded"
-  )
+  if (!["on", "off", "wordWrapColumn", "bounded"].includes(prevWordWrap))
     prevWordWrap = "on";
   return prevWordWrap;
 };
@@ -93,8 +87,8 @@ export const getPrevPosition = () => {
   if (prevPosition !== "left" && prevPosition !== "right")
     prevPosition = "left";
   return {
-    isSidePannelPositionOnLeft: prevPosition === "left" ? true : false,
-    isDrawerOpenSideIsLeft: prevPosition === "left" ? false : true,
+    isSidePannelPositionOnLeft: prevPosition === "left",
+    isDrawerOpenSideIsLeft: prevPosition !== "left",
   };
 };
 
