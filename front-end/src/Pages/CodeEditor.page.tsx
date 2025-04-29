@@ -87,40 +87,42 @@ const useAppResizer = () => {
 
 const useShortcutKeys = () => {
   const dispatch = useAppDispatch();
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.repeat) return;
 
-      if (e.key === "`" && e.ctrlKey) {
+  useEffect(() => {
+    const shortcutActions: Record<string, () => void> = {
+      'Ctrl+`': () => {
         dispatch(toggleIsBottomPannelOpen());
         dispatch(setShowInBottomPannel("terminal"));
-        return;
-      }
-
-      // toggle Side Drawer
-      if (e.key === "b" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        dispatch(toggleIsDrawerOpen());
-        return;
-      }
-
-      if (e.key === "p" && (e.metaKey || e.ctrlKey) && e.shiftKey) {
+      },
+      'Ctrl+B': () => dispatch(toggleIsDrawerOpen()),
+      'Ctrl+Shift+P': () => {
         dispatch(toggleIsDrawerOpen());
         dispatch(setShowInSideDrawer("file"));
-        return;
-      }
-
-      if (e.key === "," && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
+      },
+      'Ctrl+,': () => {
         dispatch(addFileToNavigation({ id: "setting", type: "setting" }));
-        return;
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+
+    const normalizeKey = (e: KeyboardEvent): string => {
+      let keys = [];
+      if (e.ctrlKey || e.metaKey) keys.push("Ctrl");
+      if (e.shiftKey) keys.push("Shift");
+      keys.push(e.key.toUpperCase());
+      return keys.join("+");
     };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.repeat) return;
+      const keyCombo = normalizeKey(e);
+      const action = shortcutActions[keyCombo];
+      if (action) {
+        e.preventDefault();
+        action();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [dispatch]);
 };
-
-export default CodeEditor;
