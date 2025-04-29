@@ -43,72 +43,57 @@ const useDirectory = () => {
   };
 
 
-  const findDirectory = (
-    directory: IDirectory,
-    directoryPath: Array<string>,
-    indx: number = 1
-  ): IDirectory | null => {
-    
-    if (directoryPath.length === indx) {
-      return directory;
+  const findDirectory = (directory: IDirectory, directoryPath: Array<string>): IDirectory | null => {
+  let currentDirectory = directory;
+
+  for (let i = 0; i < directoryPath.length; i++) {
+    let childFound = false;
+
+    for (let j = 0; j < currentDirectory.children.length; j++) {
+      if (currentDirectory.children[j].id === directoryPath[i]) {
+        currentDirectory = currentDirectory.children[j];
+        childFound = true;
+        break;
+      }
     }
 
-    const childIndx = directory.children.findIndex(
-      (childDirectory) => childDirectory.id === directoryPath[indx]
-    );
+    if (!childFound) {
+      return null;
+    }
+  }
 
-    // if the child directory is not found then return null
-    if (childIndx === -1) return null;
+  return currentDirectory;
+};
 
-    if (directory.children[childIndx].isFolder) {
-      const result: IDirectory | null = findDirectory(
-        directory.children[childIndx],
-        directoryPath,
-        indx + 1
-      );
-      return result;
+const findDirectoryPath = (directory: IDirectory, directoryPath: Array<string>): string => {
+  let currentDirectory = directory;
+  let fullPath = directory.name;
+
+  for (let i = 0; i < directoryPath.length; i++) {
+    let childFound = false;
+
+    for (let j = 0; j < currentDirectory.children.length; j++) {
+      if (currentDirectory.children[j].id === directoryPath[i]) {
+        currentDirectory = currentDirectory.children[j];
+        fullPath += "/" + currentDirectory.name;
+        childFound = true;
+        break;
+      }
     }
 
-    // if no found then return null
-    return null;
-  };
-
-  
-  const findDirectoryPath = (
-    directory: IDirectory,
-    directoryPath: Array<string>,
-    indx: number = 1,
-    directoryPathWithName: string = ""
-  ): string => {
-
-    if (directoryPath.length === indx) {
-      return directoryPathWithName + "/" + directory.name;
+    if (!childFound) {
+      return "path not found";
     }
+  }
 
-    const childIndx = directory.children.findIndex(
-      (childDirectory) => childDirectory.id === directoryPath[indx]
-    );
+  return fullPath;
+};
 
-    if (childIndx === -1) return "path not found";
-
-    if (directory.children[childIndx].isFolder) {
-      return findDirectoryPath(
-        directory.children[childIndx],
-        directoryPath,
-        indx + 1,
-        directoryPathWithName + "/" + directory.name
-      );
-    }
-
-    // if no found then return path not found
-    return "path not found";
-  };
-
-  return {
-    isFileOrFolderAlreadyExists,
-    findDirectory,
-    findDirectoryPath,
-  };
+return {
+  isFileOrFolderAlreadyExists,
+  findDirectory,
+  findDirectoryPath,
+};
 };
 
 export default useDirectory;
